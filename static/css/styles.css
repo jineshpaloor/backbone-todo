@@ -7,6 +7,11 @@ body{
     width: 100%;
 }
 
+.complete {
+    color: #bbb;
+    text-decoration: line-through;
+}
+
 .content {
     width: 500px;
     height: 400px;
