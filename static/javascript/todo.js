@@ -1,4 +1,4 @@
-$(function(){
+(function(mynamespace){
 
     var TodoItem = Backbone.Model.extend({
 
@@ -21,13 +21,23 @@ $(function(){
     });
 
     var TodoList = Backbone.Collection.extend({
-        model: TodoItem
+        model: TodoItem,
+
+        initialize: function(){
+            this.on('remove', this.hideModel);
+        },
+
+        hideModel: function(model){
+            model.trigger('hide');
+        }
     });
 
     //define view to show todo - render todoitem to html element
-    var TodoView = Backbone.View.extend({
+    var TodoItemView = Backbone.View.extend({
 
-        el: $('#todo-list'),
+        initialize: function(){
+            this.model('hide', this.remove, this);
+        },
 
         events: {
             'change input': 'toggleStatus'
@@ -47,6 +57,7 @@ $(function(){
         render: function(){
             var attributes = this.model.toJSON();
             this.$el.html(this.template(attributes));
+            return this;
         },
 
         toggleStatus: function(){
@@ -61,22 +72,30 @@ $(function(){
 
     var TodoListView = Backbone.View.extend({
 
-        render: function(){
-            this.collection.forEach(this.addOne, this );
+        initialize: function(){
+            this.collection.on('add', this.addOne, this);
+            this.collection.on('reset', this.addAll, this);
         },
 
         addOne: function(todoItem){
-            var todoView = new TodoView({model: todoItem});
-            console.log('todo view  :',todoView);
+            var todoView = new TodoItemView({model: todoItem});
             this.$el.append(todoView.render().el);
-        }
+        },
+
+        addAll: function(){
+            this.collection.forEach(this.addOne, this );
+        },
+
+        render: function(){
+            console.log('rendering todolist view.....');
+            this.addAll();
+            return this;
+        },
 
     });
 
 
 
-//    var todoItem = new TodoItem({id:5});
-//    var todoView = new TodoView({model:todoItem});
     var todoList = new TodoList();
 
     var todos = [
@@ -84,70 +103,19 @@ $(function(){
         {description: 'Get a car wash', status: 'incomplete'},
         {description: 'Learn Backbone', status: 'incomplete'}
     ];
+
     todoList.reset(todos);
+
     var todoListView = new TodoListView({collection: todoList});
-    todoListView.render();
+    console.log('*************todo list view  :',todoListView);
 
+    $("#todo-list").html(todoListView.render());
 
-    //var todoItem = new TodoItem({description:'I want to complete backbone tutorial today', status: 'incomplete', id:1});
-    //var todoItem1 = new TodoItem({id:1});
-    //var doThing = function(){
-    //    alert('change');
-    //};
-    //todoItem.on('change', doThing);
-    //
-    //todoItem.save({'a':'b'}, {silent: true});
+    mynamespace.TodoItem = TodoItem;
+    mynamespace.TodoList = TodoList;
+    mynamespace.TodoItemView = TodoItemView;
+    mynamespace.TodoListView = TodoListView;
+    mynamespace.todoList= todoList;
+    mynamespace.todoListView = todoListView;
 
-
-    //todoItem.fetch({
-    //    success: function() {
-    //        // fetch successfully completed
-    //        console.log('success  :',todoItem.toJSON());
-    //    },
-    //    error: function() {
-    //        console.log('Failed to fetch!');
-    //    }
-    //});
-    //
-    //todoItem1.fetch({
-    //    success: function() {
-    //        // fetch successfully completed
-    //        console.log('fetch id 1:',todoItem1.toJSON());
-    //    },
-    //    error: function() {
-    //        console.log('Failed to fetch id 1!');
-    //    }
-    //});
-    //
-    //todoItem1.save({'aa':'bb'});
-    //todoItem.destroy({success: function(model, response) {
-    //    console.log('destroy...');
-    //}, error:function(model, response){
-    //    console.log('destroy...fail');
-    //
-    //}});
-    //var todoView = new TodoView({model:todoItem});
-    //todoView.render();
-    //console.log(todoView.el);
-
-    //trying save for model : eg from backbone.js site
-
-    //Backbone.sync = function(method, model) {
-    //  alert(method + ": " + JSON.stringify(model));
-    //  model.id = 1;
-    //};
-    //
-    //var book = new Backbone.Model({
-    //  title: "The Rough Riders",
-    //  author: "Theodore Roosevelt"
-    //});
-    //
-    //book.save();
-    //
-    //console.log('before edit :',book);
-    //
-    //book.save({author: "Teddy"});
-    //
-    //console.log('after edit :',book);
-    //
-});
+})(mynamespace);
