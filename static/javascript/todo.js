@@ -1,4 +1,4 @@
-(function(mynamespace){
+$(function(){
 
     var TodoItem = Backbone.Model.extend({
 
@@ -21,6 +21,7 @@
     });
 
     var TodoList = Backbone.Collection.extend({
+
         model: TodoItem,
 
         initialize: function(){
@@ -30,10 +31,15 @@
         hideModel: function(model){
             model.trigger('hide');
         }
+
     });
 
     //define view to show todo - render todoitem to html element
     var TodoItemView = Backbone.View.extend({
+
+        tagName: "li",
+
+        className: "todo",
 
         initialize: function(){
             this.model('hide', this.remove, this);
@@ -44,7 +50,6 @@
         },
 
         initialize: function (){
-            this.render();
             this.model.on('change', this.render, this);
             this.model.on('destroy', this.remove, this);
         },
@@ -72,6 +77,8 @@
 
     var TodoListView = Backbone.View.extend({
 
+        el: $("ul#todo-list"),
+
         initialize: function(){
             this.collection.on('add', this.addOne, this);
             this.collection.on('reset', this.addAll, this);
@@ -87,35 +94,29 @@
         },
 
         render: function(){
-            console.log('rendering todolist view.....');
             this.addAll();
             return this;
         },
 
     });
 
+    var AppView = Backbone.View.extend({
 
+        initialize: function(){
+            var todoList = new TodoList();
+            var todos = [
+                {description: 'Pick up milk.', status: 'incomplete'},
+                {description: 'Get a car wash', status: 'incomplete'},
+                {description: 'Learn Backbone', status: 'incomplete'}
+            ];
+            todoList.reset(todos);
+            var model = new TodoItem({description: 'Pick up milk.', status: 'incomplete'});
+            var todoListView = new TodoListView({collection: todoList});
+            todoListView.render();
+        },
 
-    var todoList = new TodoList();
+    });
 
-    var todos = [
-        {description: 'Pick up milk.', status: 'incomplete'},
-        {description: 'Get a car wash', status: 'incomplete'},
-        {description: 'Learn Backbone', status: 'incomplete'}
-    ];
+    var appview = new AppView({});
 
-    todoList.reset(todos);
-
-    var todoListView = new TodoListView({collection: todoList});
-    console.log('*************todo list view  :',todoListView);
-
-    $("#todo-list").html(todoListView.render());
-
-    mynamespace.TodoItem = TodoItem;
-    mynamespace.TodoList = TodoList;
-    mynamespace.TodoItemView = TodoItemView;
-    mynamespace.TodoListView = TodoListView;
-    mynamespace.todoList= todoList;
-    mynamespace.todoListView = todoListView;
-
-})(mynamespace);
+});

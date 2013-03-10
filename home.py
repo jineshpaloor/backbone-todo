@@ -11,7 +11,6 @@ def home():
 
 @app.route('/getdata', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def todo_json_resp():
-    print 'get data............',request.method
     if request.method == 'PUT':
         print 'updating data  :',request.__dict__
 
@@ -23,8 +22,6 @@ def todo_json_resp():
 
 @app.route('/getdata/<id>', methods=['GET', 'POST', 'PUT', 'DELETE'] )
 def get_todo_by_id(id):
-    print 'get data by id............',request.method
-
     resp = {'description':'respond id 1 description', 'status':'incomplete', 'id':1}
     return json.dumps(resp)
 
